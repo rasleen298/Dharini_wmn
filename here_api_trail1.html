@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0, width=device-width" />
+<link rel="stylesheet" type="text/css" href="https://js.api.here.com/v3/3.0/mapsjs-ui.css?dp-version=1549984893" />
+<script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-core.js"></script>
+<script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-service.js"></script>
+<script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-ui.js"></script>
+<script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-mapevents.js"></script>
+<script src="jszip.js"></script>
+
+
+<script type="text/javascript" src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <div id="map" style="width: 100%; height: 400px; background: grey" />
+  <script  type="text/javascript" charset="UTF-8" >
+
+/**
+ * Moves the map to display over Berlin
+ *
+ * @param  {H.Map} map      A HERE Map instance within the application
+ */
+function moveMapToBerlin(map){
+  map.setCenter({lat:12.9716, lng:77.5946});
+  map.setZoom(10);
+}
+
+
+
+//12.9716° N, 77.5946° E
+
+/**
+ * Boilerplate map initialization code starts below:
+ */
+
+//Step 1: initialize communication with the platform
+var platform = new H.service.Platform({
+  "app_id": "oOOWKR6GQZu05JlhVOoP",
+  "app_code": "uDBvxpdK_OdNQDVyxwcbJg",
+  useHTTPS: true
+});
+var pixelRatio = window.devicePixelRatio || 1;
+var defaultLayers = platform.createDefaultLayers({
+  tileSize: pixelRatio === 1 ? 256 : 512,
+  ppi: pixelRatio === 1 ? undefined : 320
+});
+
+//Step 2: initialize a map  - not specificing a location will give a whole world view.
+var map = new H.Map(document.getElementById('map'),
+  defaultLayers.normal.map, {pixelRatio: pixelRatio});
+
+//Step 3: make the map interactive
+// MapEvents enables the event system
+// Behavior implements default interactions for pan/zoom (also on mobile touch environments)
+var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+
+// Create the default UI components
+var ui = H.ui.UI.createDefault(map, defaultLayers);
+
+// Now use the map as required...
+moveMapToBerlin(map);
+//new chNGES
+
+
+const lineString = new H.geo.LineString();
+//12.9716° N, 77.5946° E
+
+lineString.pushPoint({ lat:12.9716,lng:77.5946});
+lineString.pushPoint({ lat:13.1716,lng:77.5966});
+lineString.pushPoint({ lat:13.1716,lng:77.7946});
+lineString.pushPoint({ lat:12.9716,lng:77.5946});
+
+const polygon =new H.map.Polygon(lineString);
+map.addObject(polygon);
+const geometry=polygon.getGeometry();
+const wkt=geometry.toString();
+console.log(wkt);
+const zip = new JSZip();
+zip.file("data.wkt","NAME\tWKT\n"+"testfence"+"\t"+wkt);
+zip.generateAsync({type:"blob"}).then(content=>{
+  var formData=new FormData();
+  formData.append("zipfile",content);
+  axios.post("https://gfe.api.here.com/2/layers/upload.json", formData,{
+  headers: {
+    "content-type": "multipart/form-data"
+  },
+
+  params:{
+    "app_id": "oOOWKR6GQZu05JlhVOoP",
+    "app_code": "uDBvxpdK_OdNQDVyxwcbJg",
+    "layer_id":"5678"
+
+  }
+
+}).then(result=>{
+  console.log(result);
+},error=> {
+  console.error(error);
+});
+
+},error=>{
+console.error(error);
+});
+//12.9716° N, 77.5946° E
+
+
+var marker=new H.map.Marker({lat:12.9716,lng:77.5946});
+var geofencing=platform.getGeofencingService();
+map.addObject(marker);
+
+map.addEventListener("tap", ev=>{
+   var target=ev.target;
+   map.removeObject(marker);
+   marker= new H.map.Marker(map.screenToGeo(ev.currentPointer.viewportX,ev.currentPointer.viewportY));
+   map.addObject(marker);
+   geofencing.request(
+     H.service.extension.geofencing.Service.EntryPoint.SEARCH_PROXIMITY,
+     {
+       "layer_ids":["5678"],
+       "proximity":marker.getPosition().lat+","+marker.getPosition().lng,
+       "key_attributes": ["NAME"]
+     },
+   result=>
+   {
+if(result.geometries.length>0)
+     {alert("Unsafe Zone! Do not enter here");
+      console.log(result);
+     }
+   },
+
+   error=>
+   {console.error(error);
+   }
+
+  );
+
+});
+
+
+
+
+
+
+  </script>
+</body>
+</html>
