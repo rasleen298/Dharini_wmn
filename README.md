@@ -4,18 +4,18 @@
 Sex workers are not taken care of and respected in society. We have tried to build such a project that will help them curb their mental health and loneliness, as well as they can know about their health by inputing symptoms. The GPS tracker is included for the Security of sex workers.
 
 It contains three components:
-'''
-Machine learning model for disease-prediction which helps the user input symptoms and the model predicts the disease, if any.
+```
+A disease-prediction model which helps the user input symptoms and the model predicts the disease, if any.
 Chatbot: To reduce loneliness and depression among them
-GPS Tracker that ensures if the zone is safe or not!!
-'''
+Location Geofencing that ensures if the zone or remote location is safe or not!!
+```
 ## Technologies used:
 
-Javascript
-HTML/CSS
-Flask
-Machine Learning
-dialogflow
+Javascript, 
+HTML/CSS, 
+Flask, 
+Machine Learning, 
+Dialogflow, 
 Here (GeoFencing)
 
 ![Screenshot 2019-06-03 at 6 20 58 PM](https://user-images.githubusercontent.com/37113163/58803130-5dafdc00-862c-11e9-9698-98ae8ad378c0.png)
